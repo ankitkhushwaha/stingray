@@ -613,9 +613,16 @@ class EventList(StingrayTimeseries):
             None, which implies no channel->energy conversion at this stage (or a default
             calibration applied to selected missions).
 
+        source : str, optional
+            Source type. Currently supported sources: 'GBM'.
+
+        emin, emax : float
+            The minimum and maximum energies to use.
+
         kwargs : dict
             Any further keyword arguments to be passed to `load_events_and_gtis`
-            for reading in event lists in OGIP/HEASOFT format
+            for reading in event lists in OGIP/HEASOFT format.
+            The parameters `emin` and `emax` are only used when `source` == 'GBM'.
 
         Returns
         -------
@@ -628,10 +635,10 @@ class EventList(StingrayTimeseries):
                     fmt = "hea"
                     break
 
-        source = read_header_key(filename, "INSTRUME")
+        source = kwargs.pop("source", None)
         if source == "GBM":
-            emin = kwargs.pop("emin")
-            emax = kwargs.pop("emax")
+            emin = kwargs.pop("emin", None)
+            emax = kwargs.pop("emax", None)
             evt = read_gbm_data(filename, emin=emin, emax=emax)
             return evt
 

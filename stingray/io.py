@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from astropy.io import fits as pf
 from astropy import units as u
 
-from stingray.events import EventList
 import stingray.utils as utils
 from stingray.loggingconfig import setup_logger
 
@@ -1563,12 +1562,12 @@ def read_gbm_data(filename, emin=None, emax=None):
         Path to the fits file, Only TTE files are supported.
 
     emin, emax : float
-        The minimum and maximum energies to use
+        The minimum and maximum energies to use.
 
     Returns
     -------
     ev: :class:`EventList` object
-        The :class:`EventList` object reconstructed from file
+        The :class:`EventList` object reconstructed from file.
     """
     hdulist = fits.open(filename)
     header = hdulist[0].header
@@ -1595,6 +1594,9 @@ def read_gbm_data(filename, emin=None, emax=None):
     trigtime = hdulist[0].header["TRIGTIME"]
 
     hdulist.close()
+
+    # import here to prevent circular import
+    from stingray.events import EventList
 
     evt = EventList(time, energy, header)
     evt.trigtime = trigtime

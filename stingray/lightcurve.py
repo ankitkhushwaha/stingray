@@ -83,10 +83,13 @@ class Lightcurve(StingrayTimeseries):
         They will be used by other methods to have an indication of the
         "safe" time intervals to use during analysis.
 
-    err_dist: str, optional, default ``None``
+    err_dist: str, optional, None, default ``poisson``
         Statistical distribution used to calculate the
         uncertainties and other statistical values appropriately.
         Default makes no assumptions and keep errors equal to zero.
+        
+        At the moment Stingray only uses ``poisson`` err_dist.
+        All analysis in the light curve will assume Poisson errors.
 
     bg_counts: iterable,`:class:numpy.array` or `:class:List` of floats, optional, default ``None``
         A list or array of background counts detected in the background extraction region
@@ -275,7 +278,9 @@ class Lightcurve(StingrayTimeseries):
         if not skip_checks:
             time, counts, err = self.initial_optional_checks(time, counts, err, gti=gti)
 
-        if err_dist.lower() not in valid_statistics:
+        if err_dist is None:
+            pass
+        elif isinstance(err_dist, str) or err_dist.lower() not in valid_statistics:
             # err_dist set can be increased with other statistics
             raise StingrayError(
                 "Statistic not recognized." "Please select one of these: ",

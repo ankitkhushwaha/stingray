@@ -278,21 +278,20 @@ class Lightcurve(StingrayTimeseries):
         if not skip_checks:
             time, counts, err = self.initial_optional_checks(time, counts, err, gti=gti)
 
-        if err_dist is None:
-            pass
-        elif isinstance(err_dist, str) or err_dist.lower() not in valid_statistics:
-            # err_dist set can be increased with other statistics
-            raise StingrayError(
-                "Statistic not recognized." "Please select one of these: ",
-                "{}".format(valid_statistics),
-            )
-        elif not err_dist.lower() == "poisson":
-            simon(
-                "Stingray only uses poisson err_dist at the moment. "
-                "All analysis in the light curve will assume Poisson "
-                "errors. "
-                "Sorry for the inconvenience."
-            )
+        if err_dist is not None:
+            if err_dist.lower() not in valid_statistics:
+                # err_dist set can be increased with other statistics
+                raise StingrayError(
+                    "Statistic not recognized." "Please select one of these: ",
+                    "{}".format(valid_statistics),
+                )
+            elif not err_dist.lower() == "poisson":
+                simon(
+                    "Stingray only uses poisson err_dist at the moment. "
+                    "All analysis in the light curve will assume Poisson "
+                    "errors. "
+                    "Sorry for the inconvenience."
+                )
 
         self._time = time
 

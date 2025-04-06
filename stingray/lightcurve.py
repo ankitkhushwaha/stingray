@@ -8,6 +8,7 @@ or to save existing light curves in a class that's easy to use.
 import os
 import logging
 import warnings
+import copy
 from collections.abc import Iterable
 
 import numpy as np
@@ -87,7 +88,7 @@ class Lightcurve(StingrayTimeseries):
         Statistical distribution used to calculate the
         uncertainties and other statistical values appropriately.
         Default makes no assumptions and keep errors equal to zero.
-        
+
         At the moment Stingray only uses ``poisson`` err_dist.
         All analysis in the light curve will assume Poisson errors.
 
@@ -1162,6 +1163,45 @@ class Lightcurve(StingrayTimeseries):
         """
 
         return super().truncate(start=start, stop=stop, method=method)
+
+    def shift(self, time_shift: float, inplace=False):
+        """Shift the time and the GTIs by the same amount
+
+        Parameters
+        ----------
+        time_shift: float
+            The time interval by which the time series will be shifted (in
+            the same units as the time array in :class:`StingrayTimeseries`
+
+        Other parameters
+        ----------------
+        inplace : bool
+            If True, overwrite the current time series. Otherwise, return a new one.
+
+        Returns
+        -------
+        ts : ``StingrayTimeseries`` object
+            The new time series shifted by ``time_shift``
+
+        """
+        if inplace:
+            ts = self
+        else:
+            ts = copy.deepcopy(self)
+        ts.time = ts._time = np.asanyarray(ts.time) + time_shift  # type: ignore
+
+        if isinstance(self.dt, Iterable):
+            ts.tstart = ts._time[0] - 0.5 * self.dt[0]
+            ts.tseg = ts._time[-1] - ts._time[0] + self.dt[-1] / 2 + self.dt[0] / 2
+        else:
+            ts.tstart = ts._time[0] - 0.5 * self.dt
+            ts.tseg = ts._time[-1] - ts._time[0] + self.dt
+        # Pay attention here: if the GTIs are created dynamically while we
+        # access the property,
+        if ts._gti is not None:
+            ts._gti = np.asanyarray(ts._gti) + time_shift  # type: ignore
+
+        return ts
 
     def split(self, min_gap, min_points=1):
         """

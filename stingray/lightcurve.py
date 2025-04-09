@@ -88,6 +88,9 @@ class Lightcurve(StingrayTimeseries):
         uncertainties and other statistical values appropriately.
         Default makes no assumptions and keep errors equal to zero.
 
+        Stingray currently supports only Poisson error distribution.
+        All light curve analyses will assume Poisson errors.
+
     bg_counts: iterable,`:class:numpy.array` or `:class:List` of floats, optional, default ``None``
         A list or array of background counts detected in the background extraction region
         in each bin corresponding to the bins defined in `time`.

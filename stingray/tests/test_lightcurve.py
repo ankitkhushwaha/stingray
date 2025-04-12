@@ -1336,7 +1336,9 @@ class TestLightcurve(object):
             UserWarning,
             match="Some functionalities of Stingray Lightcurve will not work when `dt` is Iterable",
         ):
-            lc2 = Lightcurve(times, counts, input_counts=True, dt=[1.0] * len(times))
+            lc2 = Lightcurve(
+                times, counts, input_counts=True, dt=[1.0] * len(times), skip_checks=True
+            )
         lc1.shift(1, inplace=True)
         lc2.shift(1, inplace=True)
         assert np.allclose(lc1.time - 1, times)

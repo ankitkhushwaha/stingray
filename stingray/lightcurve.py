@@ -84,14 +84,13 @@ class Lightcurve(StingrayTimeseries):
         They will be used by other methods to have an indication of the
         "safe" time intervals to use during analysis.
 
-    err_dist: str, optional, None, default ``poisson``
+    err_dist: str, optional, default ``None``
         Statistical distribution used to calculate the
         uncertainties and other statistical values appropriately.
         Default makes no assumptions and keep errors equal to zero.
 
-        At the moment Stingray only uses ``poisson`` err_dist.
-        All analysis in the light curve will assume Poisson errors.
-
+        Stingray currently supports only Poisson error distribution.
+        All light curve analyses will assume Poisson errors.
     bg_counts: iterable,`:class:numpy.array` or `:class:List` of floats, optional, default ``None``
         A list or array of background counts detected in the background extraction region
         in each bin corresponding to the bins defined in `time`.
@@ -279,20 +278,19 @@ class Lightcurve(StingrayTimeseries):
         if not skip_checks:
             time, counts, err = self.initial_optional_checks(time, counts, err, gti=gti)
 
-        if err_dist is not None:
-            if err_dist.lower() not in valid_statistics:
-                # err_dist set can be increased with other statistics
-                raise StingrayError(
-                    "Statistic not recognized." "Please select one of these: ",
-                    "{}".format(valid_statistics),
-                )
-            elif not err_dist.lower() == "poisson":
-                simon(
-                    "Stingray only uses poisson err_dist at the moment. "
-                    "All analysis in the light curve will assume Poisson "
-                    "errors. "
-                    "Sorry for the inconvenience."
-                )
+        if err_dist.lower() not in valid_statistics:
+            # err_dist set can be increased with other statistics
+            raise StingrayError(
+                "Statistic not recognized." "Please select one of these: ",
+                "{}".format(valid_statistics),
+            )
+        elif not err_dist.lower() == "poisson":
+            simon(
+                "Stingray only uses poisson err_dist at the moment. "
+                "All analysis in the light curve will assume Poisson "
+                "errors. "
+                "Sorry for the inconvenience."
+            )
 
         self._time = time
 
@@ -311,7 +309,6 @@ class Lightcurve(StingrayTimeseries):
             dt = 1.0
 
         self.dt = dt
-
         if isinstance(dt, Iterable):
             warnings.warn(
                 "Some functionalities of Stingray Lightcurve will not work when `dt` is Iterable"
@@ -1192,10 +1189,8 @@ class Lightcurve(StingrayTimeseries):
 
         if isinstance(self.dt, Iterable):
             ts.tstart = ts._time[0] - 0.5 * self.dt[0]
-            ts.tseg = ts._time[-1] - ts._time[0] + self.dt[-1] / 2 + self.dt[0] / 2
         else:
             ts.tstart = ts._time[0] - 0.5 * self.dt
-            ts.tseg = ts._time[-1] - ts._time[0] + self.dt
         # Pay attention here: if the GTIs are created dynamically while we
         # access the property,
         if ts._gti is not None:
